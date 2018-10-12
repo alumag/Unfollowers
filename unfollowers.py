@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Get a set of the user's Unfollowers in order to kick their asses later
+import pickle
+import os
 
 from InstagramAPI import InstagramAPI
 
@@ -42,7 +44,27 @@ def getTotalFollowers(api, user_id):
     return followers
 
 
-if __name__ == "__main__":
+def getFollowersDiff(followers):
+    """
+    Return the diff between current followers and past followers
+    """
+    if os.path.exists('followers.json'):
+        with open('followers.json') as f:
+            followers_diff = pickle.load(f)
+            return followers_diff - followers
+
+
+def getFollowinsgDiff(followings):
+    """
+        Return the diff between current followings and past followings
+        """
+    if os.path.exists('followings.json'):
+        with open('followings.json') as f:
+            followings_diff = pickle.load(f)
+            return followings_diff - followings
+
+
+def main():
     # Login
     api = InstagramAPI(USERNAME, PASSWORD)
     api.login()
@@ -58,4 +80,20 @@ if __name__ == "__main__":
     print('Number of followings:', len(followings))
 
     # Difference
-    print('Unfollowers:', followings - followers)
+    print('Poepole that not following me back:', followings - followers)
+
+    print('Followers diff from last state:', getFollowersDiff(followers))
+    print('Followings diff from last state:', getFollowinsgDiff(followings))
+
+    save = raw_input('Save current state?: (y/n)')
+
+    if 'y' == str(save).lower() or 'yes' == str(save).lower():
+        with open('followers.json', 'w') as f:
+            pickle.dump(followers, f)
+
+        with open('followings.json', 'w') as f:
+            pickle.dump(followings, f)
+
+
+if "__main__" == __name__:
+    main()
